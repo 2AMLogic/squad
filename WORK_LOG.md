@@ -8,6 +8,8 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 ### 2026-11-16
 
+- **PR #318**: fix: ship $schema in the repo-scoped opencode.json the installer creates
+- **Issue #317** (closed): Installer: ship $schema in the repo-scoped opencode.json it creates
 - **PR #316**: chore(deps-dev): Bump @types/node from 26.6.5 to 26.6.6 in the npm-minor-patch group
 
 ### 2026-11-14
