@@ -1224,6 +1224,7 @@ function opencodeConfig(scope, plan, opts, on, launcherRel, portableRuntime) {
     return;
   }
   const fields = {
+    $schema: "https://opencode.ai/config.json",
     "mcp/squad/type": "local",
     "mcp/squad/command": ["node", launcherRel],
     "mcp/squad/environment/SQUAD_DIR": ".squad",

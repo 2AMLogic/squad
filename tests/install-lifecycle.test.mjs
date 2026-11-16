@@ -860,6 +860,7 @@ test("opencode: install wires mcp + commands, is idempotent, and uninstall remov
   const { repo, run } = fixture("opencode");
   run();
   const cfg = JSON.parse(readFileSync(join(repo, "opencode.json"), "utf8"));
+  assert.equal(cfg.$schema, "https://opencode.ai/config.json");
   assert.equal(cfg.mcp.squad.type, "local");
   assert.deepEqual(cfg.mcp.squad.command, ["node", ".claude/hooks/squad-mcp.mjs"]);
   assert.equal(cfg.mcp.squad.environment.SQUAD_DIR, ".squad");
@@ -894,6 +895,30 @@ test("opencode: a pre-existing user config survives install and uninstall", () =
   assert.ok(during.mcp.squad);
   run("uninstall.sh");
   assert.deepEqual(JSON.parse(readFileSync(join(repo, "opencode.json"), "utf8")), original);
+});
+test("opencode: merge adds $schema, keeps user keys, and uninstall restores the original", () => {
+  const { repo, run } = fixture("opencode-merge");
+  const original = {
+    model: "zai/glm",
+    mcp: { other: { type: "local", command: ["x"] } },
+  };
+  writeFileSync(join(repo, "opencode.json"), JSON.stringify(original, null, 2) + "\n");
+  run();
+  const during = JSON.parse(readFileSync(join(repo, "opencode.json"), "utf8"));
+  assert.equal(during.$schema, "https://opencode.ai/config.json");
+  assert.equal(during.model, "zai/glm");
+  assert.deepEqual(during.mcp.other, original.mcp.other);
+  run("install.sh", ["--check"]);
+  run("uninstall.sh");
+  assert.deepEqual(JSON.parse(readFileSync(join(repo, "opencode.json"), "utf8")), original);
+  const c = fixture("opencode-custom-schema");
+  const custom = { $schema: "https://example.com/custom.json", model: "x" };
+  writeFileSync(join(c.repo, "opencode.json"), JSON.stringify(custom, null, 2) + "\n");
+  c.run();
+  assert.equal(
+    JSON.parse(readFileSync(join(c.repo, "opencode.json"), "utf8")).$schema,
+    "https://example.com/custom.json",
+  );
 });
 test("opencode: jsonc and user-defined squad servers are preserved, not rewritten", () => {
   const a = fixture("opencode-jsonc");
