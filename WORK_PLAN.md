@@ -32,6 +32,7 @@ _None._
 Issues currently being built (`loom:building`).
 
 - **#295**: squad review request is not a verb; point users at review open
+- **#321**: squad_claims returns every stale claim; add a default filter
 
 ## PRs Awaiting Review
 
@@ -49,8 +50,9 @@ _None._
 
 Issues carrying `loom:curated`.
 
-- **#78**: Research integration: Validate a second research room for one week *(curated)*
+- **#78**: Research integration: Validate a second research room for one week *(curated)* *(held)*
 - **#295**: squad review request is not a verb; point users at review open *(curated)*
+- **#321**: squad_claims returns every stale claim; add a default filter *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -68,10 +70,10 @@ _None._
 | Very important | 0 |
 | Important | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 1 |
+| In Progress (`loom:building`) | 2 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 2 |
+| Curated | 3 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
