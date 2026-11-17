@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.19.40
+
+- The `squad_claims` MCP tool now hides stale claims by default and returns `{ claims, stale_omitted }`
+  instead of a bare array, where `stale_omitted` counts the stale claims left out of the result.
+  Optional `include_stale: true` lists stale claims too (e.g. to take one over), and `path_prefix`
+  restricts the result to claims whose path starts with it (#321).
+
 ## 0.19.39
 
 - The repo-scoped `opencode.json` the installer creates now ships `$schema: "https://opencode.ai/config.json"`. A pre-existing `$schema` value is preserved on merge, and uninstall still restores the original file (#317).
