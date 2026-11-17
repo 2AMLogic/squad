@@ -6,6 +6,13 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-17
+
+- **PR #325**: docs: note squad_claims stale-hiding divergence in capabilities table
+- **PR #322**: feat: hide stale claims from squad_claims by default
+- **Issue #324** (closed): docs/capabilities.md: Advisory claims row no longer states the MCP/CLI divergence for squad_claims
+- **Issue #321** (closed): squad_claims returns every stale claim; add a default filter
+
 ### 2026-11-16
 
 - **PR #318**: fix: ship $schema in the repo-scoped opencode.json the installer creates
