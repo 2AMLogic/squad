@@ -38,7 +38,7 @@ export async function runMcpServer(): Promise<void> {
   // never able to block or fail the tool call that inserted the message.
   squad.onMessageInserted = opportunisticRelay(db);
 
-  const server = new McpServer({ name: "squad", version: "0.19.39" });
+  const server = new McpServer({ name: "squad", version: "0.19.40" });
 
   const cardCreateSchema = {
     title: z.string().min(1).describe("Short card title"),
@@ -544,10 +544,29 @@ export async function runMcpServer(): Promise<void> {
       description:
         "List the room's advisory claims: which persona says it is working on which file or " +
         "area, when the claim was staked, and whether it has gone stale (its holder has been " +
-        "absent). Claims are visibility, not locks — check here before editing shared files.",
-      inputSchema: {},
+        "absent). Claims are visibility, not locks — check here before editing shared files. " +
+        "Stale claims are hidden by default so a long-lived room does not flood your context; " +
+        "the result is { claims, stale_omitted } where stale_omitted counts the stale claims " +
+        "left out of this query. Pass include_stale: true to list them too (e.g. to take one " +
+        "over), and path_prefix to restrict the result to claims whose path starts with it.",
+      inputSchema: {
+        include_stale: z
+          .boolean()
+          .optional()
+          .describe("Also return claims whose holder is stale (default false)"),
+        path_prefix: z
+          .string()
+          .optional()
+          .describe("Only return claims whose path starts with this prefix"),
+      },
     },
-    async () => json(squad.claims()),
+    async ({ include_stale, path_prefix }) => {
+      const matching = squad
+        .claims()
+        .filter((claim) => path_prefix === undefined || claim.path.startsWith(path_prefix));
+      const claims = include_stale ? matching : matching.filter((claim) => !claim.stale);
+      return json({ claims, stale_omitted: matching.length - claims.length });
+    },
   );
 
   server.registerTool(

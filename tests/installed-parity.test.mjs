@@ -478,7 +478,7 @@ test(
         const path = `participant-${index}.md`;
         await call(client, "squad_claim", { path });
         assert.ok(
-          (await call(peer, "squad_claims")).some(
+          (await call(peer, "squad_claims")).claims.some(
             (item) =>
               item.path === path && item.persona === joined[index].persona,
           ),
@@ -565,7 +565,7 @@ test(
         ),
       );
       await call(clients[0], "squad_goal_done", { id: goal.id });
-      assert.equal((await call(clients[1], "squad_claims")).length, 0);
+      assert.equal((await call(clients[1], "squad_claims")).claims.length, 0);
 
       const missingTitle = await clients[0].callTool({
         name: "squad_card_create",
