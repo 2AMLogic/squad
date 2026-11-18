@@ -32,7 +32,6 @@ _None._
 Issues currently being built (`loom:building`).
 
 - **#295**: squad review request is not a verb; point users at review open
-- **#328**: ci: qualify PR checks for GitHub merge queues
 
 ## PRs Awaiting Review
 
@@ -69,7 +68,7 @@ _None._
 | Very important | 0 |
 | Important | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 2 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
 | Curated | 2 |

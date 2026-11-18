@@ -6,6 +6,13 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-18
+
+- **PR #332**: docs: point no-surface-change marker guidance at commit messages for the merge queue
+- **PR #330**: ci: qualify test and version-check workflows for merge groups
+- **Issue #331** (closed): ci: merge-group version check rejects PRs whose no-surface-change marker is only in the PR body
+- **Issue #328** (closed): ci: qualify PR checks for GitHub merge queues
+
 ### 2026-11-17
 
 - **PR #325**: docs: note squad_claims stale-hiding divergence in capabilities table
