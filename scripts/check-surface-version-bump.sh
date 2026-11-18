@@ -95,7 +95,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --help|-h)
-      sed -n '2,55p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,/^[^#]/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)

@@ -87,3 +87,12 @@ test("no watched-surface change exits 0 without a marker", () => {
   const base = git(repo, ["rev-parse", "HEAD~1"]);
   assert.equal(check(repo, base, "HEAD").status, 0);
 });
+
+test("--help renders the full header through the exit codes", () => {
+  const r = spawnSync("bash", [SCRIPT, "--help"], { encoding: "utf8" });
+  assert.equal(r.status, 0, r.stderr);
+  const text = r.stdout + r.stderr;
+  assert.match(text, /path is still accepted wherever PR_BODY is set/);
+  assert.match(text, /Exit codes:/);
+  assert.match(text, /2 - bad usage \(missing\/invalid --base or --head\)/);
+});
