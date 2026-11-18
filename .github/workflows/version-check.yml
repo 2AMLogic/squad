@@ -39,9 +39,9 @@ jobs:
       # On pull_request, diff the PR's own base..head; the marker may come
       # from the PR body. On merge_group, diff the queue's base..head (the
       # combined tree of every member PR); the PR body is not part of that
-      # event, so the body-marker path is PR-only there -- the pull_request
-      # run above still enforces it before the PR can be enqueued, and a
-      # commit-message marker works in both contexts.
+      # event, so the body-marker path is PR-only there -- a body-only
+      # marker cannot clear the queue, and a commit-message marker works in
+      # both contexts.
       - name: Check surface-visible changes bump VERSION
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
