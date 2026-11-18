@@ -1007,8 +1007,11 @@ falsely "current."
 `package.json`'s `"version"` and the `McpServer` version string in
 `src/mcp.ts` in sync; `pnpm test` enforces this) via `/loom:bump`, or, if the
 change genuinely does not alter installed behavior (a comment, a typo fix, a
-test-only edit), add this exact marker to the PR body or a commit message
-instead:
+test-only edit), add this exact marker to **a commit message in the PR**
+instead. The merge queue's `check-version-bump` run does not see the PR
+body (a `merge_group` event carries no body), so a commit message is the
+queue-safe place; a body-only marker clears the PR check but cannot clear
+the queue:
 
 ```
 <!-- loom:no-surface-change -->

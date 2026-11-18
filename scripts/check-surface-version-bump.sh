@@ -48,6 +48,13 @@
 # `env: PR_BODY: ${{ github.event.pull_request.body }}`); the commit-message
 # path needs no extra plumbing beyond --base/--head.
 #
+# The two locations are NOT equivalent under the merge queue: a merge_group
+# event carries no PR body, so a body-only marker clears the pull_request
+# run but fails check-version-bump on the queue's combined tree, and the fix
+# (a new commit) ejects the PR from the queue. The commit message is the
+# queue-safe location -- put the marker there (behavior unchanged; the body
+# path is still accepted wherever PR_BODY is set). (#331)
+#
 # Exit codes:
 #   0 - nothing under the watched paths changed in the diff, OR VERSION was
 #       also changed, OR the no-surface-change marker is present.
@@ -88,7 +95,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --help|-h)
-      sed -n '2,55p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,/^[^#]/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'
       exit 0
       ;;
     *)
@@ -162,7 +169,9 @@ echo "    /loom:bump   (or edit VERSION + package.json by hand)" >&2
 echo "" >&2
 echo "If this change genuinely does not alter installed behavior (e.g. a" >&2
 echo "comment, a test-only edit, a typo fix), declare that explicitly instead" >&2
-echo "of bumping VERSION -- add this exact marker to the PR body or to a commit" >&2
-echo "message in this PR:" >&2
+echo "of bumping VERSION -- add this exact marker to a commit message in this" >&2
+echo "PR (the merge queue's check-version-bump run does not see the PR body," >&2
+echo "so a commit message is the queue-safe place; a body-only marker clears" >&2
+echo "the pull_request check but cannot clear the queue):" >&2
 echo "    $MARKER" >&2
 exit 1
