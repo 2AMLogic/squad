@@ -9,9 +9,19 @@ name: Version check
 on:
   pull_request:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
+    branches: [main]
 
 permissions:
   contents: read
+
+# Merge-group runs key on the queue's unique head SHA in their own
+# `merge_group`-scoped group, so a PR run can never cancel or supersede one.
+# PR behavior is unchanged (no cancellation there either).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.sha }}
+  cancel-in-progress: false
 
 jobs:
   check-version-bump:
@@ -21,13 +31,21 @@ jobs:
         uses: actions/checkout@v7
         with:
           # Full history so --base/--head can diff without relying on a
-          # merge-base a shallow checkout might not have.
+          # merge-base a shallow checkout might not have. Default ref is
+          # github.sha -- for a merge_group event, the merge-group head
+          # commit (the combined queue tree), not the PR head.
           fetch-depth: 0
 
+      # On pull_request, diff the PR's own base..head; the marker may come
+      # from the PR body. On merge_group, diff the queue's base..head (the
+      # combined tree of every member PR); the PR body is not part of that
+      # event, so the body-marker path is PR-only there -- the pull_request
+      # run above still enforces it before the PR can be enqueued, and a
+      # commit-message marker works in both contexts.
       - name: Check surface-visible changes bump VERSION
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           ./scripts/check-surface-version-bump.sh \
-            --base "${{ github.event.pull_request.base.sha }}" \
-            --head "${{ github.event.pull_request.head.sha }}"
+            --base "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}" \
+            --head "${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}"
