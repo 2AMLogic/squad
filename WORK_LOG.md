@@ -6,6 +6,11 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-19
+
+- **PR #335**: docs: scope Squad room join to attended sessions in block and skill
+- **Issue #334** (closed): Installed AGENTS.md block makes unattended Codex roles stop when no Squad runtime exists
+
 ### 2026-11-18
 
 - **PR #332**: docs: point no-surface-change marker guidance at commit messages for the merge queue
