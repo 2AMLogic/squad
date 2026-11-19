@@ -275,6 +275,19 @@ test("a receipt-less v0.1.0 install is adopted without conflict, keeping the per
   );
   assert.ok(!readFileSync(join(f.repo, "CLAUDE.md"), "utf8").includes("Join commands: `/squad:join` (Claude) or `/squad-join` (Codex) — then hold\nthe loop"));
   assert.ok(readFileSync(join(f.repo, "CLAUDE.md"), "utf8").startsWith("# mine"));
+  const managed = (name) =>
+    readFileSync(join(f.repo, name), "utf8").match(
+      /<!-- BEGIN SQUAD -->[\s\S]*<!-- END SQUAD -->/,
+    )[0];
+  const unattended =
+    "Join the Squad room for attended sessions. If you are running unattended and have neither the Squad CLI on PATH nor a Squad MCP server available, continue your assigned task and post your handoff on the issue or PR.";
+  assert.equal(managed("CLAUDE.md"), managed("AGENTS.md"));
+  for (const text of [
+    managed("CLAUDE.md"),
+    managed("AGENTS.md"),
+    readFileSync(join(f.repo, ".agents/skills/squad/SKILL.md"), "utf8"),
+  ])
+    assert.ok(text.includes(unattended));
   f.run("install.sh", ["--check"]);
   f.run("uninstall.sh");
   assert.ok(!existsSync(join(f.repo, ".claude/commands/squad/join.md")));
