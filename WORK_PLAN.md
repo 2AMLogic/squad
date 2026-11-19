@@ -3,7 +3,7 @@
 This snapshot follows GitHub lifecycle labels. Operator-only issues require their recorded action before autonomous dispatch. Dependency PRs outside the Loom review lane are omitted.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-18T23:45:00Z (snapshot; compare against live labels)_
+_Generated: 2026-11-19T01:12:12Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -33,7 +33,6 @@ _None._
 Issues currently being built (`loom:building`).
 
 - **#295**: squad review request is not a verb; point users at review open
-- **#334**: Installed AGENTS.md block makes unattended Codex roles stop when no Squad runtime exists
 
 ## PRs Awaiting Review
 
@@ -53,7 +52,6 @@ Issues carrying `loom:curated`.
 
 - **#78**: Research integration: Validate a second research room for one week *(curated)* *(held)*
 - **#295**: squad review request is not a verb; point users at review open *(curated)*
-- **#334**: Installed AGENTS.md block makes unattended Codex roles stop when no Squad runtime exists *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -71,10 +69,10 @@ _None._
 | Very important | 0 |
 | Important | 0 |
 | Ready (`loom:issue`) | 0 |
-| In Progress (`loom:building`) | 2 |
+| In Progress (`loom:building`) | 1 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
-| Curated | 3 |
+| Curated | 2 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
