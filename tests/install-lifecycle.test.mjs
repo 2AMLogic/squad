@@ -288,6 +288,17 @@ test("a receipt-less v0.1.0 install is adopted without conflict, keeping the per
     readFileSync(join(f.repo, ".agents/skills/squad/SKILL.md"), "utf8"),
   ])
     assert.ok(text.includes(unattended));
+  for (const runtime of [".agents", ".claude"]) {
+    const conventions = readFileSync(
+      join(f.repo, runtime, "skills/squad/references/conventions.md"),
+      "utf8",
+    );
+    assert.match(
+      conventions,
+      /^- \*\*In a room session,.*`squad_join`.*returned `db` path.*CLI-only workers.*`squad send`.*in that same room/m,
+      `${runtime} must scope both room instructions to a room session`,
+    );
+  }
   f.run("install.sh", ["--check"]);
   f.run("uninstall.sh");
   assert.ok(!existsSync(join(f.repo, ".claude/commands/squad/join.md")));
