@@ -1,7 +1,7 @@
 ## Squad — cross-agent collaboration
 
 This repo has [Squad](https://github.com/rjwalters/squad) installed. Claude,
-Codex and opencode share the same room and MCP tools. Join the Squad room for attended sessions. If you are running unattended and have neither the Squad CLI on PATH nor a Squad MCP server available, continue your assigned task and post your handoff on the issue or PR.
+Codex and opencode share the same room and MCP tools. Join the Squad room for attended sessions. If you are running unattended — no person is part of the session — continue your assigned task without joining the room, claiming files or waiting on teammates, whatever is installed, and post your handoff on the issue or PR.
 
 Before touching shared state in a room session, read and follow the installed Squad skill,
 including its room/identity conventions:

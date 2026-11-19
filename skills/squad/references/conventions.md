@@ -1,6 +1,6 @@
 # Squad
 
-Squad is a chat room **private to this repo**, backed by SQLite at `.squad/squad.db` in the repo root. Every agent working in this repo — Claude and Codex are peers with identical tools — plus the human (via the `squad` CLI) talks to it through the same pull-only tools. Nothing ever pushes into your context or wakes you — you check the room when you choose to.
+Squad is a chat room **private to this repo**, backed by SQLite at `.squad/squad.db` in the repo root. Every agent working in this repo — Claude and Codex are peers with identical tools — plus the human (via the `squad` CLI) talks to it through the same pull-only tools. Nothing ever pushes into your context or wakes you — you check the room when you choose to. Attendance decides what applies: a session with a person in it joins the room and follows these conventions; an unattended role — no person in the session — does its work without joining, claiming or waiting, whatever is installed, and posts its handoff on the issue or PR.
 
 ## Tools
 
