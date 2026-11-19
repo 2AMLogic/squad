@@ -280,7 +280,11 @@ test("a receipt-less v0.1.0 install is adopted without conflict, keeping the per
       /<!-- BEGIN SQUAD -->[\s\S]*<!-- END SQUAD -->/,
     )[0];
   const unattended =
-    "Join the Squad room for attended sessions. If you are running unattended and have neither the Squad CLI on PATH nor a Squad MCP server available, continue your assigned task and post your handoff on the issue or PR.";
+    "Join the Squad room for attended sessions. If you are running unattended — no person is part of the session — continue your assigned task without joining the room, claiming files or waiting on teammates, whatever is installed, and post your handoff on the issue or PR.";
+  const attendance =
+    "an unattended role — no person in the session — does its work without joining, claiming or waiting, whatever is installed, and posts its handoff on the issue or PR";
+  const joinScopes =
+    "Joining is for attended sessions — when a person in the session asks for the room. An unattended role does not join: it continues its assigned task without joining, claiming or waiting, whatever is installed, and posts its handoff on the issue or PR. In an attended session, if the `squad_*` MCP tools are not available";
   assert.equal(managed("CLAUDE.md"), managed("AGENTS.md"));
   for (const text of [
     managed("CLAUDE.md"),
@@ -297,6 +301,18 @@ test("a receipt-less v0.1.0 install is adopted without conflict, keeping the per
       conventions,
       /^- \*\*In a room session,.*`squad_join`.*returned `db` path.*CLI-only workers.*`squad send`.*in that same room/m,
       `${runtime} must scope both room instructions to a room session`,
+    );
+    assert.ok(
+      conventions.includes(attendance),
+      `${runtime} conventions intro must state the unconditional attendance rule`,
+    );
+    const joinRef = readFileSync(
+      join(f.repo, runtime, "skills/squad/references/join.md"),
+      "utf8",
+    );
+    assert.ok(
+      joinRef.includes(joinScopes),
+      `${runtime} join reference must scope the missing-tool stop to attended sessions`,
     );
   }
   f.run("install.sh", ["--check"]);
@@ -329,6 +345,82 @@ test("a v0.1.0-form .mcp.json entry pointing at another runtime is preserved and
     "/elsewhere/dist/index.js",
   ]);
   assert.match(out, /preserved external launcher/);
+});
+const v1940 = (name) =>
+  readFileSync(new URL(`./fixtures/v0.19.40/${name}`, import.meta.url), "utf8");
+// A fresh clone of a repo installed at 0.19.40: every tracked managed file is
+// present, but the gitignored ownership receipt is not, and the instruction
+// files still hold the released pre-#335 block, byte-identical to upstream.
+function freshCloneReceiptLess(f) {
+  // install-metadata.json stays: it is tracked, so a fresh clone has it, and
+  // its artifact digests recover file ownership. The gitignored receipt does
+  // not survive, so block (fragment) ownership is what the hash list restores.
+  rmSync(join(f.repo, ".claude/skills/squad/.install-local.json"));
+  const seeded = {};
+  for (const name of ["CLAUDE.md", "AGENTS.md"]) {
+    seeded[name] = `# consumer ${name}\n\n${v1940("block.txt")}\n\nconsumer footer\n`;
+    writeFileSync(join(f.repo, name), seeded[name]);
+  }
+  return seeded;
+}
+test("a receipt-less clone with a released 0.19.40 block adopts and updates it", () => {
+  const f = fixture("v1940");
+  f.run();
+  const seeded = freshCloneReceiptLess(f);
+  const dry = f.run("install.sh", ["--dry-run", "--no-link"]);
+  assert.match(dry, /update: .*CLAUDE\.md/, dry);
+  assert.match(dry, /update: .*AGENTS\.md/, dry);
+  for (const name of ["CLAUDE.md", "AGENTS.md"])
+    assert.equal(
+      readFileSync(join(f.repo, name), "utf8"),
+      seeded[name],
+      "dry-run must not write",
+    );
+  f.run();
+  for (const name of ["CLAUDE.md", "AGENTS.md"]) {
+    const text = readFileSync(join(f.repo, name), "utf8");
+    assert.ok(
+      text.startsWith(`# consumer ${name}\n\n<!-- BEGIN SQUAD -->`),
+      `${name} must keep the consumer text above the block`,
+    );
+    assert.ok(
+      text.endsWith("<!-- END SQUAD -->\n\nconsumer footer\n"),
+      `${name} must keep the consumer text below the block`,
+    );
+    assert.ok(!text.includes("neither the Squad CLI on PATH"), `${name} must not keep the old block`);
+    assert.ok(
+      text.includes(
+        "If you are running unattended — no person is part of the session — continue your assigned task without joining the room, claiming files or waiting on teammates, whatever is installed, and post your handoff on the issue or PR.",
+      ),
+      `${name} must carry the unconditional attendance rule`,
+    );
+  }
+  // The instruction files and every skill artifact report current. The one
+  // remaining check note is the pre-existing receipt-less-launcher stance:
+  // a clone's .mcp.json names the machine it was installed on, so it stays
+  // externally managed ("never infer config ownership") and hash adoption is
+  // scoped to the two Markdown blocks.
+  const check = f.run("install.sh", ["--check"], 1);
+  assert.ok(check.includes("unmanaged Claude launcher"), check);
+  assert.ok(!check.includes("differs from its installed copy"), check);
+  assert.ok(
+    !check.includes("modified or legacy unmanaged block"),
+    check,
+  );
+});
+test("a one-byte customization inside a released 0.19.40 block is still a conflict", () => {
+  const f = fixture("v1940-edit");
+  f.run();
+  const seeded = freshCloneReceiptLess(f);
+  const edited = {};
+  for (const name of ["CLAUDE.md", "AGENTS.md"]) {
+    edited[name] = seeded[name].replace("Squad", "Squad!");
+    writeFileSync(join(f.repo, name), edited[name]);
+  }
+  const out = f.run("install.sh", [], 1);
+  assert.match(out, /modified or legacy unmanaged block/, out);
+  for (const name of ["CLAUDE.md", "AGENTS.md"])
+    assert.equal(readFileSync(join(f.repo, name), "utf8"), edited[name]);
 });
 test("customized hook entries retain the script they still invoke", () => {
   const f = fixture("custom-hook");

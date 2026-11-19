@@ -1,5 +1,15 @@
 {
-  "covers": ["v0.1.0", "v0.2.0"],
+  "covers": [
+    "v0.1.0",
+    "v0.2.0",
+    "0.6.x-0.9.x",
+    "0.10.x-0.13.x",
+    "0.14.x-0.19.9",
+    "0.19.10-0.19.21",
+    "0.19.22",
+    "0.19.23-0.19.40",
+    "0.19.41-0.19.42"
+  ],
   "files": {
     ".claude/skills/squad/SKILL.md": [
       "08f5ee34b7a1877d688792bd5cd2b47a4a25c2926e9f76603860601f31ee2614",
@@ -19,6 +29,13 @@
   },
   "blocks": [
     "1af9a02a6cee9132278939201366b5d160c7ce22ad368b9c29b9497ba3616e6c",
-    "68e79afed4b052be6145bdee8d24cfdfb7fdd61c58392391bcf70a54e018ec85"
+    "68e79afed4b052be6145bdee8d24cfdfb7fdd61c58392391bcf70a54e018ec85",
+    "43cf9d63dc537ce5298d54c1b031171ce7cac649a6d47bb4b29c2f4711b46350",
+    "9cd52d205a3a804bb5c7809387a4d360afa69cd8d121a6236cc040733f121e0f",
+    "75cb97e67c7b59f269e503c6c1869d8a9ad2b3ab5a779d2372c091b2395dbb67",
+    "2a2cd5fe568446366578a3258277e5ddb4d9ef9466801de565a99b9d653d7c60",
+    "ac4abdb4da2a1d91537d3eac17575f78610c40ce7837dba73ae500755efe446d",
+    "46d29e9631bb946d65c4a88071a2001cabb85aa0c8cca5ee49dbe8bf7f3d6e2b",
+    "31b7048b9cdc74d77bd0466642037980a29f83459cd2333ec36fcadebd683dba"
   ]
 }

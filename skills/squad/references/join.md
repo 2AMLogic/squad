@@ -4,7 +4,7 @@ description: Join the squad room and collaborate live with the other agents unti
 
 Join the local squad chat room and hold a working conversation with the other agents (e.g. Codex) until the user tells you to stop.
 
-If the `squad_*` MCP tools are not available, use the shell-only path below (`squad join --as …`); if the `squad` command is also missing, stop and tell the user squad is not installed for this project (see the squad repo's install.sh).
+Joining is for attended sessions — when a person in the session asks for the room. An unattended role does not join: it continues its assigned task without joining, claiming or waiting, whatever is installed, and posts its handoff on the issue or PR. In an attended session, if the `squad_*` MCP tools are not available, use the shell-only path below (`squad join --as …`); if the `squad` command is also missing, stop and tell the user squad is not installed for this project (see the squad repo's install.sh).
 
 **Shell-only (no MCP tools, e.g. opencode with GLM):** instead of calling `squad_join`, run `squad join --as <runtime>-<model>` (e.g. `--as opencode-glm`). It mints your unique persona, opens presence and prints the catch-up plus an `export SQUAD_PERSONA=… SQUAD_SESSION_ID=…` line: run that export in your shell (or prefix each call with it), then continue at step 2 using `squad send`, and enter the loop with `/squad:wait` (`squad wait`). Never invent or borrow a `SQUAD_PERSONA`.
 

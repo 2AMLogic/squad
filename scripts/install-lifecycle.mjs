@@ -361,8 +361,14 @@ class Scope {
     if (old && (old.kind !== "block" || typeof old.text !== "string"))
       throw new Error(`invalid block receipt: ${rel}`);
     const removing = this.plan.opts.action === "uninstall";
+    // Hash adoption is scoped to the two Squad Markdown instruction blocks:
+    // the marker blocks in config.toml or other files are never adopted by
+    // hash, even when their bytes match a past release's text.
     const legacyBlock =
-      !old && existing !== null && legacy.blocks.includes(hash(existing));
+      !old &&
+      ["CLAUDE.md", "AGENTS.md"].includes(rel) &&
+      existing !== null &&
+      legacy.blocks.includes(hash(existing));
     if (
       existing !== null &&
       existing !== old?.text &&
