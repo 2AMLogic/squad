@@ -8,6 +8,10 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 ### 2026-11-19
 
+- **PR #342**: fix: adopt released instruction blocks without a receipt; make the attendance rule unconditional
+- **PR #339**: docs: scope shared-state room instructions to room sessions
+- **Issue #341** (closed): The #335 fix does not reach installed repos: install.sh skips the block on a fresh clone, and conventions.md / join.md still stop unattended roles
+- **Issue #337** (closed): Installed references/conventions.md still states the room join as an unconditional precondition
 - **PR #335**: docs: scope Squad room join to attended sessions in block and skill
 - **Issue #334** (closed): Installed AGENTS.md block makes unattended Codex roles stop when no Squad runtime exists
 
