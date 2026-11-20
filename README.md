@@ -277,17 +277,19 @@ preserves it as external configuration. Do not delete receipts indiscriminately:
 they are the evidence used for safe removal. Unknown old prompts or modified
 blocks are preserved for review.
 
-Upgrading from a receipt-less install (v0.1.0 predates ownership receipts): the
-installer ships `scripts/legacy-hashes.json`, the sha256 of the skill, the
-`/squad:*` command files and the CLAUDE.md/AGENTS.md block as released in v0.1.0
-and v0.2.0, the only tagged releases (later untagged versions are not covered).
-A byte-identical match is adopted and updated normally, and a v0.1.0-form
-`.mcp.json` entry (`node <this checkout's dist/index.js>`) is migrated to the
-launcher, keeping its `SQUAD_PERSONA`. Anything that differs by even one byte,
-or an `.mcp.json` entry naming another runtime, is preserved and reported as a
-conflict: back it up, remove it, and rerun the installer (set
-`SQUAD_CLAUDE_PERSONA` to keep a persona pin you removed). Existing unmanaged Codex config is never rewritten; update
-its source path manually if moving the checkout.
+When the local ownership receipt is missing, the installer uses SHA-256 hashes
+in `scripts/legacy-hashes.json` to recognize the skill, command files, and
+instruction blocks shipped in v0.1.0 and v0.2.0. For `CLAUDE.md` and `AGENTS.md`,
+it also recognizes Squad blocks shipped from 0.6.0 through 0.19.42. On a fresh
+clone, it can update a matching block while preserving text outside the markers.
+
+The installer migrates a v0.1.0-form `.mcp.json` entry
+(`node <this checkout's dist/index.js>`) to the launcher, keeping its
+`SQUAD_PERSONA`. It preserves customized blocks and reports a conflict.
+Back up a conflicting block before removing it and rerunning the installer.
+If you replace an external Claude launcher, set `SQUAD_CLAUDE_PERSONA` to
+keep its persona pin. If you move the checkout, update the source path in
+any unmanaged Codex configuration manually.
 
 Development uses the same checkout-backed installation: edit the canonical
 `skills/squad/` sources, regenerate aliases with
