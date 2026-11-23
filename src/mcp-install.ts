@@ -19,6 +19,11 @@ export interface McpInstallCheck {
 /** Packages mcp.ts imports at startup; a configured install must resolve all of them. */
 export const RUNTIME_PACKAGES = ["@modelcontextprotocol/sdk", "zod"];
 
+/** Release install's runtime, the launcher's default when no SQUAD_RUNTIME is recorded (#347). */
+export function defaultRuntime(env: NodeJS.ProcessEnv = process.env): string {
+  return join(env.SQUAD_HOME || join(homedir(), ".local/share/squad"), "current/dist/index.js");
+}
+
 /** Project `.mcp.json` SQUAD_RUNTIME and the Codex `[mcp_servers.squad]` entry. */
 export function configuredEntries(
   cwd: string,
@@ -28,8 +33,20 @@ export function configuredEntries(
   const mcpPath = join(cwd, ".mcp.json");
   if (existsSync(mcpPath)) {
     try {
-      const runtime = JSON.parse(readFileSync(mcpPath, "utf8"))?.mcpServers?.squad?.env?.SQUAD_RUNTIME;
-      if (typeof runtime === "string" && runtime) {
+      const server = JSON.parse(readFileSync(mcpPath, "utf8"))?.mcpServers?.squad;
+      const runtime = server?.env?.SQUAD_RUNTIME;
+      const launcher = server?.args?.[0];
+      if (
+        server &&
+        typeof server === "object" &&
+        !runtime &&
+        !env.SQUAD_RUNTIME &&
+        (typeof launcher !== "string" || launcher.endsWith("squad-mcp.mjs"))
+      ) {
+        // No path recorded: the managed launcher falls back to the release
+        // install, so validate that rather than reporting nothing.
+        entries.push({ source: mcpPath, runtime: defaultRuntime(env) });
+      } else if (typeof runtime === "string" && runtime) {
         // Same order as hooks/squad-mcp.mjs: a relative path was recorded against
         // the primary clone, so from a linked worktree look there first.
         const own = resolve(dirname(mcpPath), runtime);

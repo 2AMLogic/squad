@@ -228,8 +228,16 @@ byte-identical installed artifact — everything machine-local stays in
 primary clone, so linked git worktrees work too (see "Worktree sessions" above).
 Start the MCP client in the target repository root or any of its worktrees.
 Moving both checkouts together preserves this launcher without editing tracked
-configuration. Other layouts record an absolute runtime path with an installer
-warning. Checks resolve project paths from the target root and accept equivalent
+configuration. Installing from a release install
+(`${SQUAD_HOME:-~/.local/share/squad}/current`, see `scripts/release-install.sh`)
+records **no** `SQUAD_RUNTIME` in `.mcp.json` or `opencode.json`: with none set in
+the environment or `.mcp.json`, the launcher defaults to
+`${SQUAD_HOME:-~/.local/share/squad}/current/dist/index.js`, resolved from the
+running user's home, so the committed config carries no machine-specific path and
+works for every user with a release install. Reinstalling from the release
+location removes a runtime path an earlier install wrote; a value you set yourself
+is kept, and an environment or `.mcp.json` value always wins. Other layouts record
+an absolute runtime path with an installer warning. Checks resolve project paths from the target root and accept equivalent
 absolute or relative spellings; existing custom launchers and room overrides
 remain preserved, and an unmanaged launcher is never given a `SQUAD_RUNTIME`.
 
@@ -323,7 +331,9 @@ re-run the installer on each repo only when you want to repoint it. Running
 that agents will point at a dev tree, which `SQUAD_DEV=1` silences.
 `squad doctor` checks the configured entries (`.mcp.json` `SQUAD_RUNTIME` in the
 current directory, the Codex `config.toml`): it fails naming any missing package
-and warns when an entry is a dev clone.
+and warns when an entry is a dev clone. A squad server in `.mcp.json` with no
+`SQUAD_RUNTIME` is checked against the launcher's default,
+`${SQUAD_HOME:-~/.local/share/squad}/current/dist/index.js`.
 
 ### Healing rooms earlier versions left untracked
 
