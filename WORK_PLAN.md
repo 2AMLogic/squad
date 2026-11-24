@@ -3,6 +3,7 @@
 This snapshot follows GitHub lifecycle labels. Operator-only issues require their recorded action before autonomous dispatch. Dependency PRs outside the Loom review lane are omitted.
 
 <!-- guide:plan-body:start -->
+_Generated: 2026-11-23T14:53:33Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -49,7 +50,7 @@ _None._
 
 Issues carrying `loom:curated`.
 
-- **#78**: Research integration: Validate a second research room for one week *(curated)*
+- **#78**: Research integration: Validate a second research room for one week *(curated)* *(held)*
 - **#295**: squad review request is not a verb; point users at review open *(curated)*
 
 ## Proposed (Architect / Hermit)
