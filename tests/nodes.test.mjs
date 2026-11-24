@@ -222,3 +222,45 @@ test("node snapshots and bindings round-trip; clear removes the graph and proven
     "future-node",
   ]);
 });
+
+test("read operations load each node snapshot once per call, in ascending id order", (t) => {
+  const { db, squad } = room(t);
+  squad.nodeCreate({ title: "alpha", question: "first?" });
+  squad.nodeCreate({ title: "beta", question: "second?" });
+  squad.nodeCreate({ title: "gamma", question: "third?" });
+  const snapshotLoads = [];
+  const originalPrepare = db.prepare.bind(db);
+  db.prepare = (sql) => {
+    const statement = originalPrepare(sql);
+    if (sql !== "SELECT * FROM science_cards WHERE id = ?") return statement;
+    return { get: (id, ...rest) => {
+      snapshotLoads.push(id);
+      return statement.get(id, ...rest);
+    } };
+  };
+  const measure = (fn) => {
+    const before = snapshotLoads.length;
+    const result = fn();
+    return { result, ids: snapshotLoads.slice(before) };
+  };
+
+  const list = measure(() => squad.nodeList());
+  assert.deepEqual(list.ids, [1, 2, 3]);
+  assert.deepEqual(
+    list.result.map((n) => n.title),
+    ["alpha", "beta", "gamma"],
+  );
+
+  const outline = measure(() => squad.outlineRender());
+  assert.deepEqual(outline.ids, [1, 2, 3]);
+
+  const steward = measure(() => squad.stewardStatus());
+  assert.deepEqual(steward.ids, [1, 2, 3]);
+  assert.equal(steward.result.nodes.length, 3);
+  assert.equal(steward.result.outline.version, outline.result.version);
+
+  squad.nodeCreate({ title: "delta", question: "fourth?" });
+  const next = measure(() => squad.outlineRender());
+  assert.deepEqual(next.ids, [1, 2, 3, 4]);
+  assert.notEqual(next.result.version, outline.result.version);
+});

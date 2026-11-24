@@ -863,25 +863,27 @@ export class Squad {
 
   nodeList() {
     return this.nodeTransaction(() =>
-      (
-        this.db.prepare("SELECT id FROM science_cards ORDER BY id").all() as {
-          id: number;
-        }[]
-      ).map(({ id }) => {
-        const node = this.nodeGetSnapshot(id);
-        return {
-          id,
-          title: node.title,
-          question: node.question,
-          phase: node.phase,
-          revision: node.revision,
-          dependencies: node.dependencies,
-          artifacts: node.artifacts,
-          banked: node.banked,
-          review_status: node.review_status,
-        };
-      }),
+      this.nodeSnapshots().map((node) => ({
+        id: node.id,
+        title: node.title,
+        question: node.question,
+        phase: node.phase,
+        revision: node.revision,
+        dependencies: node.dependencies,
+        artifacts: node.artifacts,
+        banked: node.banked,
+        review_status: node.review_status,
+      })),
     );
+  }
+
+  /** Every full node snapshot in ascending id order, one read inside the caller's transaction. */
+  private nodeSnapshots() {
+    return (
+      this.db.prepare("SELECT id FROM science_cards ORDER BY id").all() as {
+        id: number;
+      }[]
+    ).map(({ id }) => this.nodeGetSnapshot(id));
   }
 
   nodeClaim(id: number, expectedRevision: number, target?: string) {
@@ -1191,9 +1193,7 @@ export class Squad {
     return this.nodeTransaction(() => {
       const configuration = this.integrationGet();
       const observedMs = Date.now();
-      const nodes = this.nodeList().map((node) =>
-        this.nodeGetSnapshot(node.id),
-      );
+      const nodes = this.nodeSnapshots();
       const attempts = (
         this.db
           .prepare(
@@ -1238,7 +1238,10 @@ export class Squad {
         unbanked_declared_node_ids: nodes
           .filter((n) => !n.banked && n.artifacts.length > 0)
           .map((n) => n.id),
-        outline: this.outlineStatus(),
+        outline: this.outlineStatusFrom(
+          renderOutline(configuration, nodes),
+          configuration,
+        ),
         claims,
         claim_policy:
           "advisory only; claims older than 24 hours may still be intentional" as const,
@@ -1442,32 +1445,36 @@ export class Squad {
 
   outlineRender() {
     return this.nodeTransaction(() =>
-      renderOutline(
-        this.integrationGet(),
-        this.nodeList().map((n) => this.nodeGetSnapshot(n.id)),
-      ),
+      renderOutline(this.integrationGet(), this.nodeSnapshots()),
     );
   }
   outlineStatus(path = "SQUAD_OUTLINE.md") {
     validateOutlinePath(path);
-    return this.nodeTransaction(() => {
-      const snapshot = this.outlineRender();
-      const publications = outlinePublications(this.db, this.persona, path);
-      const latest = [...publications]
-        .reverse()
-        .find(
-          (p) =>
-            p.attempt.status === "verified" &&
-            p.config_revision === this.integrationGet().revision,
-        );
-      return {
-        path,
-        version: snapshot.version,
-        fresh: latest?.version === snapshot.version,
-        remote_visibility: "unobserved" as const,
-        publications,
-      };
-    });
+    return this.nodeTransaction(() =>
+      this.outlineStatusFrom(this.outlineRender(), this.integrationGet(), path),
+    );
+  }
+  /** Freshness of an already-rendered outline against a configuration already read in the same transaction. */
+  private outlineStatusFrom(
+    snapshot: ReturnType<typeof renderOutline>,
+    configuration: IntegrationState,
+    path = "SQUAD_OUTLINE.md",
+  ) {
+    const publications = outlinePublications(this.db, this.persona, path);
+    const latest = [...publications]
+      .reverse()
+      .find(
+        (p) =>
+          p.attempt.status === "verified" &&
+          p.config_revision === configuration.revision,
+      );
+    return {
+      path,
+      version: snapshot.version,
+      fresh: latest?.version === snapshot.version,
+      remote_visibility: "unobserved" as const,
+      publications,
+    };
   }
   async outlinePublish(options: OutlinePublishOptions) {
     return publishOutline(
