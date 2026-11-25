@@ -6,6 +6,11 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-25
+
+- **PR #348**: fix: default the MCP launcher to the release install and stop recording its path
+- **Issue #347** (closed): Release installs write a machine-specific absolute SQUAD_RUNTIME into tracked .mcp.json / opencode.json
+
 ### 2026-11-24
 
 - **PR #350**: perf: load node snapshots once per read operation

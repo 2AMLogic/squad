@@ -3,12 +3,12 @@
 This snapshot follows GitHub lifecycle labels. Operator-only issues require their recorded action before autonomous dispatch. Dependency PRs outside the Loom review lane are omitted.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-25T02:28:08Z (snapshot; compare against live labels)_
+_Generated: 2026-11-25T10:57:39Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
 
-- **#348**: fix: default the MCP launcher to the release install and stop recording its path
+_None._
 
 ## Very Important
 
@@ -32,7 +32,7 @@ Human-approved issues ready for implementation (`loom:issue`).
 
 Issues currently being built (`loom:building`).
 
-- **#347**: Release installs write a machine-specific absolute SQUAD_RUNTIME into tracked .mcp.json / opencode.json
+_None._
 
 ## PRs Awaiting Review
 
@@ -44,7 +44,7 @@ _None._
 
 PRs that passed review and are queued for Champion auto-merge (`loom:pr`).
 
-- **#348**: fix: default the MCP launcher to the release install and stop recording its path
+_None._
 
 ## Proposed
 
@@ -52,7 +52,6 @@ Issues carrying `loom:curated`.
 
 - **#78**: Research integration: Validate a second research room for one week *(curated)* *(held)*
 - **#295**: squad review request is not a verb; point users at review open *(curated)*
-- **#347**: Release installs write a machine-specific absolute SQUAD_RUNTIME into tracked .mcp.json / opencode.json *(curated)*
 
 ## Proposed (Architect / Hermit)
 
@@ -66,14 +65,14 @@ _None._
 
 | Bucket | Count |
 |------|-------|
-| Operator merge-risk holds | 1 |
+| Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 0 |
 | Ready (`loom:issue`) | 1 |
-| In Progress (`loom:building`) | 2 |
-| PRs awaiting review | 1 |
-| Approved PRs awaiting merge | 1 |
-| Curated | 3 |
+| In Progress (`loom:building`) | 0 |
+| PRs awaiting review | 0 |
+| Approved PRs awaiting merge | 0 |
+| Curated | 2 |
 | Architect / Hermit proposals | 0 |
 | Active epics | 0 |
 <!-- guide:plan-body:end -->
