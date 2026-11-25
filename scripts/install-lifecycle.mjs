@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import { resolve, dirname, join, relative, sep, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash, randomUUID } from "node:crypto";
+import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 let parseToml;
@@ -474,6 +475,19 @@ class Scope {
           this.plan.conflict(`${path}:${key} was customized`);
           next.values[key] = previous;
         }
+      } else if (desired === undefined) {
+        // A field this install no longer records (#347): remove the value we
+        // wrote (or a receipt-less release wrote), never one the user set.
+        if (
+          existing !== undefined &&
+          ((previous &&
+            (equal(existing, previous.installed) || equivalent.includes(key))) ||
+            adopt.includes(key))
+        ) {
+          delete node[leaf];
+          changed = true;
+        } else if (existing !== undefined)
+          this.plan.note(`preserved external config: ${path}:${key}`);
       } else if (previous) {
         if (!equal(existing, previous.installed)) {
           if (equivalent.includes(key)) {
@@ -688,10 +702,22 @@ async function main() {
       if (scope.old.files?.[rel]) scope.next.files[rel] = scope.old.files[rel];
   const runtimePath = join(source, "dist/index.js");
   const siblingSource = dirname(source) === dirname(opts.target);
-  const portableRuntime = siblingSource
-    ? relative(opts.target, runtimePath)
-    : runtimePath;
-  if (!siblingSource && opts.action === "install")
+  // A release install (`${SQUAD_HOME:-~/.local/share/squad}/current`) records no
+  // runtime path: the launcher defaults to that location for each user, so the
+  // tracked config carries no machine-specific path (#347).
+  const releaseCurrent = join(
+    process.env.SQUAD_HOME || join(homedir(), ".local/share/squad"),
+    "current",
+  );
+  const releaseInstall =
+    !siblingSource &&
+    (source === releaseCurrent || sameRealPath(source, releaseCurrent));
+  const portableRuntime = releaseInstall
+    ? undefined
+    : siblingSource
+      ? relative(opts.target, runtimePath)
+      : runtimePath;
+  if (!siblingSource && !releaseInstall && opts.action === "install")
     plan.note(
       "warning: Squad source is not a sibling of the target; the project MCP launcher records an absolute path and must be refreshed after moving checkouts",
     );
@@ -806,7 +832,8 @@ async function main() {
     // or custom configuration names the runtime directly in args.
     const spec =
       launched === launcherPath
-        ? configured.env?.SQUAD_RUNTIME
+        ? configured.env?.SQUAD_RUNTIME ||
+          (releaseInstall ? runtimePath : undefined)
         : configured.args[0];
     if (typeof spec !== "string" || !spec)
       plan.attention.push(
@@ -1203,6 +1230,13 @@ function hookSettings(scope, specs) {
  * https://opencode.ai/config.json: {type:"local", command:[...], environment:{}}.
  * An opencode.jsonc (comments) or unparseable opencode.json is never rewritten.
  */
+function sameRealPath(a, b) {
+  try {
+    return fs.realpathSync(a) === fs.realpathSync(b);
+  } catch {
+    return false;
+  }
+}
 function opencodeConfig(scope, plan, opts, on, launcherRel, portableRuntime) {
   const rel = "opencode.json";
   const prior = scope.old.fragments?.[rel];
@@ -1223,8 +1257,11 @@ function opencodeConfig(scope, plan, opts, on, launcherRel, portableRuntime) {
     }
   }
   if (skip) {
+    const runtimeEnv = portableRuntime
+      ? `, "SQUAD_RUNTIME": "${portableRuntime}"`
+      : "";
     plan.note(
-      `preserved ${skip} untouched (comments/unparseable); add the squad MCP server manually: "mcp": {"squad": {"type": "local", "command": ["node", "${launcherRel}"], "environment": {"SQUAD_DIR": ".squad", "SQUAD_RUNTIME": "${portableRuntime}"}}}`,
+      `preserved ${skip} untouched (comments/unparseable); add the squad MCP server manually: "mcp": {"squad": {"type": "local", "command": ["node", "${launcherRel}"], "environment": {"SQUAD_DIR": ".squad"${runtimeEnv}}}}`,
     );
     if (prior) scope.next.fragments[rel] = prior;
     return;

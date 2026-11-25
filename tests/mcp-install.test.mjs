@@ -74,6 +74,27 @@ test(".mcp.json relative SQUAD_RUNTIME resolves against the .mcp.json directory"
   ]);
 });
 
+test(".mcp.json squad server without SQUAD_RUNTIME yields the release default entry (#347)", (t) => {
+  const f = fixture(t);
+  const mcp = join(f.cwd, ".mcp.json");
+  writeFileSync(
+    mcp,
+    JSON.stringify({ mcpServers: { squad: { command: "node", args: [".claude/hooks/squad-mcp.mjs"], env: { SQUAD_DIR: ".squad" } } } }),
+  );
+  const home = join(f.root, "squad-home");
+  assert.deepEqual(configuredEntries(f.cwd, { ...f.env, SQUAD_HOME: home }), [
+    { source: mcp, runtime: join(home, "current/dist/index.js") },
+  ]);
+  // An env-level runtime means the launcher will not use the default.
+  assert.deepEqual(configuredEntries(f.cwd, { ...f.env, SQUAD_HOME: home, SQUAD_RUNTIME: "/x/index.js" }), []);
+  // A server that is not the managed launcher is not given a default.
+  writeFileSync(mcp, JSON.stringify({ mcpServers: { squad: { command: "node", args: ["/other/server.js"] } } }));
+  assert.deepEqual(configuredEntries(f.cwd, { ...f.env, SQUAD_HOME: home }), []);
+  // No squad server at all: nothing to validate.
+  writeFileSync(mcp, JSON.stringify({ mcpServers: { other: {} } }));
+  assert.deepEqual(configuredEntries(f.cwd, { ...f.env, SQUAD_HOME: home }), []);
+});
+
 test("unparseable .mcp.json yields no entry and does not throw", (t) => {
   const f = fixture(t);
   writeFileSync(join(f.cwd, ".mcp.json"), "{ not json");

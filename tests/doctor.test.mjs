@@ -220,6 +220,53 @@ test("squad doctor warns, but passes, when the configured runtime is a dev clone
   );
 });
 
+// #347: a release install records no SQUAD_RUNTIME; the launcher defaults to
+// ${SQUAD_HOME:-~/.local/share/squad}/current, so doctor validates that instead.
+function withDefaultRuntime(install, fn) {
+  const root = mkdtempSync(join(tmpdir(), "squad-mcpdefault-"));
+  try {
+    const squadHome = join(root, "squad-home");
+    if (install) {
+      const current = join(squadHome, "current");
+      mkdirSync(join(current, "dist"), { recursive: true });
+      writeFileSync(join(current, "dist/index.js"), "");
+      for (const pkg of ["@modelcontextprotocol/sdk", "zod"]) {
+        mkdirSync(join(current, "node_modules", pkg), { recursive: true });
+        writeFileSync(join(current, "node_modules", pkg, "package.json"), "{}");
+      }
+    }
+    const project = join(root, "project");
+    mkdirSync(project);
+    writeFileSync(
+      join(project, ".mcp.json"),
+      JSON.stringify({
+        mcpServers: {
+          squad: { command: "node", args: [".claude/hooks/squad-mcp.mjs"], env: { SQUAD_DIR: ".squad" } },
+        },
+      }),
+    );
+    const env = { ...process.env, SQUAD_DIR: join(root, "room"), SQUAD_HOME: squadHome, CODEX_HOME: join(root, "no-codex") };
+    delete env.SQUAD_RUNTIME;
+    return fn(spawnSync(process.execPath, [entry, "doctor"], { cwd: project, encoding: "utf8", env }));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+test("squad doctor accepts an absent SQUAD_RUNTIME when the release default resolves (#347)", () => {
+  withDefaultRuntime(true, (res) => {
+    assert.equal(res.status, 0, res.stdout + res.stderr);
+    assert.match(res.stdout, /\[ok\] mcp-install: 1 configured entry resolve/);
+  });
+});
+
+test("squad doctor fails clearly when an absent SQUAD_RUNTIME has no release install to default to (#347)", () => {
+  withDefaultRuntime(false, (res) => {
+    assert.equal(res.status, 1, res.stdout + res.stderr);
+    assert.match(res.stdout, /\[FAIL\] mcp-install:.*current\/dist\/index\.js does not exist/);
+  });
+});
+
 test("squad doctor reports waker unit health and per-persona wake handle state", () => {
   const dir = mkdtempSync(join(tmpdir(), "squad-doctor-"));
   const home = mkdtempSync(join(tmpdir(), "squad-doctor-home-"));

@@ -19,7 +19,9 @@
 // which every worktree checkout of the repo also has, and passes the runtime's
 // location in `SQUAD_RUNTIME` (relative to the repository root when the squad
 // checkout is a sibling, absolute for any other layout — the same value the
-// launcher used to hold in `args`). This file is byte-identical in every
+// launcher used to hold in `args`). A release install
+// (`${SQUAD_HOME:-~/.local/share/squad}/current`) records no SQUAD_RUNTIME at
+// all: the launcher defaults to that location for the running user. This file is byte-identical in every
 // consumer repo on every machine, so it is safe to commit: everything
 // machine-local stays in `.mcp.json`, where the installer's ownership receipts
 // already manage it.
@@ -31,6 +33,7 @@
 // stdout belongs to the MCP stdio transport: diagnostics go to stderr only.
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { execFileSync } from "node:child_process";
+import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -102,16 +105,16 @@ if (!process.env.SQUAD_RUNTIME || !process.env.SQUAD_DIR) {
   }
 }
 
-const spec = process.env.SQUAD_RUNTIME;
-if (!spec) {
-  console.error(
-    "squad: SQUAD_RUNTIME is not set; this launcher needs the squad runtime path from .mcp.json",
+// With no runtime recorded anywhere, use the release install's stable path
+// (scripts/release-install.sh), resolved from the running user's home so the
+// same committed config works for every user and machine with a release
+// install. An environment or .mcp.json value above always wins.
+const spec =
+  process.env.SQUAD_RUNTIME ||
+  join(
+    process.env.SQUAD_HOME || join(homedir(), ".local/share/squad"),
+    "current/dist/index.js",
   );
-  console.error(
-    "squad: rerun install.sh from the squad source checkout in this repository",
-  );
-  process.exit(1);
-}
 const candidates = isAbsolute(spec)
   ? [spec]
   : roots.map((root) => resolve(root, spec));

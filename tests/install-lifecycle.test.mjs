@@ -942,6 +942,73 @@ test("installing through a symlinked release path records that path, not its tar
     new RegExp(`args = \\["${join(link, "dist/index.js").replaceAll("/", "\\\\?/")}"\\]`),
   );
 });
+// #347: a release install lives at a path every user shares, so the launcher
+// defaults to it and tracked config records no runtime path at all.
+function installVia(link, { repo, env }, args = []) {
+  return spawnSync("bash", [join(link, "install.sh"), "-y", "--no-link", ...args, repo], {
+    env,
+    encoding: "utf8",
+  });
+}
+test("a release install records no SQUAD_RUNTIME in .mcp.json or opencode.json (#347)", () => {
+  const f = fixture("release-default");
+  const link = join(f.home, ".local/share/squad/current");
+  mkdirSync(join(f.home, ".local/share/squad"), { recursive: true });
+  symlinkSync(process.cwd(), link);
+  const r = installVia(link, f);
+  assert.equal(r.status, 0, r.stderr + r.stdout);
+  assert.doesNotMatch(r.stderr + r.stdout, /not a sibling/);
+  const mcp = JSON.parse(readFileSync(join(f.repo, ".mcp.json"), "utf8"));
+  assert.deepEqual(mcp.mcpServers.squad.env, { SQUAD_DIR: ".squad" });
+  const oc = JSON.parse(readFileSync(join(f.repo, "opencode.json"), "utf8"));
+  assert.deepEqual(oc.mcp.squad.environment, { SQUAD_DIR: ".squad" });
+  for (const file of [".mcp.json", "opencode.json"])
+    assert.ok(!readFileSync(join(f.repo, file), "utf8").includes(f.home), `${file} has no home path`);
+  const check = installVia(link, f, ["--check"]);
+  assert.equal(check.status, 0, check.stderr + check.stdout);
+  assert.doesNotMatch(check.stderr + check.stdout, /missing Claude runtime path/);
+  // The same install is idempotent and uninstall leaves nothing behind.
+  assert.equal(installVia(link, f).status, 0);
+  const un = spawnSync("bash", [join(link, "uninstall.sh"), "-y", f.repo], { env: f.env, encoding: "utf8" });
+  assert.equal(un.status, 0, un.stderr + un.stdout);
+});
+test("SQUAD_HOME relocates the release default; a real directory counts too (#347)", () => {
+  const f = fixture("release-custom-home");
+  const squadHome = join(f.home, "elsewhere");
+  mkdirSync(squadHome, { recursive: true });
+  symlinkSync(process.cwd(), join(squadHome, "current"));
+  f.env.SQUAD_HOME = squadHome;
+  const r = installVia(join(squadHome, "current"), f);
+  assert.equal(r.status, 0, r.stderr + r.stdout);
+  assert.equal(JSON.parse(readFileSync(join(f.repo, ".mcp.json"), "utf8")).mcpServers.squad.env.SQUAD_RUNTIME, undefined);
+});
+test("reinstalling from the release default drops the absolute path it wrote, keeps a user's own (#347)", () => {
+  const f = fixture("release-upgrade");
+  const squadHome = join(f.home, "rel");
+  mkdirSync(squadHome, { recursive: true });
+  const link = join(squadHome, "current");
+  symlinkSync(process.cwd(), link);
+  // Not the default location yet (HOME-based default differs): absolute path recorded.
+  assert.equal(installVia(link, f).status, 0);
+  const cfgPath = join(f.repo, ".mcp.json");
+  const ocPath = join(f.repo, "opencode.json");
+  const abs = join(link, "dist/index.js");
+  assert.equal(JSON.parse(readFileSync(cfgPath, "utf8")).mcpServers.squad.env.SQUAD_RUNTIME, abs);
+  assert.equal(JSON.parse(readFileSync(ocPath, "utf8")).mcp.squad.environment.SQUAD_RUNTIME, abs);
+  // Same install, now the default location.
+  f.env.SQUAD_HOME = squadHome;
+  const up = installVia(link, f);
+  assert.equal(up.status, 0, up.stderr + up.stdout);
+  assert.equal(JSON.parse(readFileSync(cfgPath, "utf8")).mcpServers.squad.env.SQUAD_RUNTIME, undefined);
+  assert.equal(JSON.parse(readFileSync(ocPath, "utf8")).mcp.squad.environment.SQUAD_RUNTIME, undefined);
+  assert.equal(installVia(link, f, ["--check"]).status, 0);
+  // A user-set differing value survives a default-location reinstall.
+  const cfg = JSON.parse(readFileSync(cfgPath, "utf8"));
+  cfg.mcpServers.squad.env.SQUAD_RUNTIME = "/opt/custom/dist/index.js";
+  writeFileSync(cfgPath, JSON.stringify(cfg));
+  assert.equal(installVia(link, f).status, 0);
+  assert.equal(JSON.parse(readFileSync(cfgPath, "utf8")).mcpServers.squad.env.SQUAD_RUNTIME, "/opt/custom/dist/index.js");
+});
 test("installing from a development clone notes it unless SQUAD_DEV=1 (#168)", () => {
   const dev = fixture("dev-note");
   const noted = dev.run("install.sh", ["--dry-run"]);
