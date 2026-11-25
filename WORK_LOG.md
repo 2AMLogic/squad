@@ -6,6 +6,11 @@ Merged PRs and closed issues from the last 30 days when this log was initialized
 
 - [2026-09](work_log/WORK_LOG_2026-09.md)
 
+### 2026-11-24
+
+- **PR #350**: perf: load node snapshots once per read operation
+- **Issue #349** (closed): Reuse node snapshots in outline rendering and steward status
+
 ### 2026-11-19
 
 - **PR #342**: fix: adopt released instruction blocks without a receipt; make the attendance rule unconditional

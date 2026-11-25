@@ -3,7 +3,7 @@
 This snapshot follows GitHub lifecycle labels. Operator-only issues require their recorded action before autonomous dispatch. Dependency PRs outside the Loom review lane are omitted.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-24T16:24:05Z (snapshot; compare against live labels)_
+_Generated: 2026-11-25T02:28:08Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -33,13 +33,12 @@ Human-approved issues ready for implementation (`loom:issue`).
 Issues currently being built (`loom:building`).
 
 - **#347**: Release installs write a machine-specific absolute SQUAD_RUNTIME into tracked .mcp.json / opencode.json
-- **#349**: Reuse node snapshots in outline rendering and steward status
 
 ## PRs Awaiting Review
 
 PRs waiting on Judge (`loom:review-requested`).
 
-- **#350**: perf: load node snapshots once per read operation
+_None._
 
 ## Approved (Awaiting Merge)
 
