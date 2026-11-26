@@ -324,11 +324,13 @@ bash ~/.local/share/squad/current/install.sh ~/projects/my-lean-proof
 
 `SQUAD_HOME` (default `~/.local/share/squad`) and `SQUAD_BIN_DIR` (default
 `~/.local/bin`) relocate the install. Re-running `release-install.sh` swaps the
-`current` symlink atomically; installing from `current/` records that stable
-path (never the versioned directory) in `.mcp.json` and the Codex config, so
-re-run the installer on each repo only when you want to repoint it. Running
-`install.sh` from the clone remains the explicit dev opt-in: it prints a note
-that agents will point at a dev tree, which `SQUAD_DEV=1` silences.
+`current` symlink atomically. On a fresh install from `current/`, the project
+launcher resolves `current/dist/index.js` under the running user's Squad home
+at startup. The installer leaves `SQUAD_RUNTIME` out of the repo's `.mcp.json`
+and `opencode.json`. The global Codex registration records the absolute path
+through `current`. These registrations pick up the next release when the
+symlink moves. Running `install.sh` from the clone opts into the dev tree and
+prints a notice, which `SQUAD_DEV=1` silences.
 `squad doctor` checks the configured entries (`.mcp.json` `SQUAD_RUNTIME` in the
 current directory, the Codex `config.toml`): it fails naming any missing package
 and warns when an entry is a dev clone. A squad server in `.mcp.json` with no
@@ -1004,10 +1006,10 @@ for what these deterministic checks establish.
 references, `hooks/squad-mcp.mjs` (the project MCP launcher), and (with
 `--reentry`) `hooks/squad-reentry.sh` into every consumer repo, and
 `codex/prompts/squad-*.md` globally into `$CODEX_HOME/prompts/` (default
-`~/.codex/prompts/`); every installed
-`.mcp.json` also runs the compiled MCP server straight out of this repo's
-`src/` (via `dist/`), so a server-behavior change reaches consumers as soon as
-this repo updates. `install-metadata.json` records `VERSION` at install time,
+`~/.codex/prompts/`). A change to the MCP server reaches release installs
+when `current` points to a build containing the change. Checkout-backed
+installs pick it up when the configured checkout's `dist/` is rebuilt.
+`install-metadata.json` records `VERSION` at install time,
 and `/repo:update-tools` compares it against this repo's current `VERSION` to
 detect drift — so a `VERSION` that never moves makes every consumer look
 falsely "current."
