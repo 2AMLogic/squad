@@ -3,7 +3,7 @@
 This snapshot follows GitHub lifecycle labels. Operator-only issues require their recorded action before autonomous dispatch. Dependency PRs outside the Loom review lane are omitted.
 
 <!-- guide:plan-body:start -->
-_Generated: 2026-11-25T10:57:39Z (snapshot; compare against live labels)_
+_Generated: 2026-11-27T18:40:00Z (snapshot; compare against live labels)_
 ## Operator Attention: Merge-Risk-Hold Pileup
 
 Judge-approved PRs under a hold (`loom:blocked` or `loom:operator`) — only a human merge decision is missing.
@@ -26,7 +26,13 @@ _None._
 
 Human-approved issues ready for implementation (`loom:issue`).
 
-- **#295**: squad review request is not a verb; point users at review open
+_None._
+
+## Issues with Open PRs (Not Dispatchable)
+
+`loom:issue` issues an open linked PR already holds; listed with the PR and its stage, not counted in Ready.
+
+- **#295**: squad review request is not a verb; point users at review open — open PR #300 (held)
 
 ## In Progress
 
@@ -68,7 +74,7 @@ _None._
 | Operator merge-risk holds | 0 |
 | Very important | 0 |
 | Important | 0 |
-| Ready (`loom:issue`) | 1 |
+| Ready (`loom:issue`, net of open linked PRs) | 0 |
 | In Progress (`loom:building`) | 0 |
 | PRs awaiting review | 0 |
 | Approved PRs awaiting merge | 0 |
